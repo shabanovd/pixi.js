@@ -13,7 +13,7 @@
 PIXI.CustomRenderable = function()
 {
 	PIXI.DisplayObject.call( this );
-
+	this.renderable = true;
 }
 
 // constructor
