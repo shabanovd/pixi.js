@@ -8,65 +8,65 @@
  * @class MovieClip
  * @extends Sprite
  * @constructor
- * @param textures {Array<Texture>} an array of {Texture} objects that make up the animation
+ * @param textures {Array(Texture)} an array of {Texture} objects that make up the animation
  */
 PIXI.MovieClip = function(textures)
 {
-	PIXI.Sprite.call(this, textures[0]);
+    PIXI.Sprite.call(this, textures[0]);
 
-	/**
-	 * The array of textures that make up the animation
-	 *
-	 * @property textures
-	 * @type Array
-	 */
-	this.textures = textures;
+    /**
+     * The array of textures that make up the animation
+     *
+     * @property textures
+     * @type Array(Texture)
+     */
+    this.textures = textures;
 
-	/**
-	 * The speed that the MovieClip will play at. Higher is faster, lower is slower
-	 *
-	 * @property animationSpeed
-	 * @type Number
-	 * @default 1
-	 */
-	this.animationSpeed = 1;
+    /**
+     * The speed that the MovieClip will play at. Higher is faster, lower is slower
+     *
+     * @property animationSpeed
+     * @type Number
+     * @default 1
+     */
+    this.animationSpeed = 1;
 
-	/**
-	 * Whether or not the movie clip repeats after playing.
-	 *
-	 * @property loop
-	 * @type Boolean
-	 * @default true
-	 */
-	this.loop = true;
+    /**
+     * Whether or not the movie clip repeats after playing.
+     *
+     * @property loop
+     * @type Boolean
+     * @default true
+     */
+    this.loop = true;
 
-	/**
-	 * Function to call when a MovieClip finishes playing
-	 *
-	 * @property onComplete
-	 * @type Function
-	 */
-	this.onComplete = null;
+    /**
+     * Function to call when a MovieClip finishes playing
+     *
+     * @property onComplete
+     * @type Function
+     */
+    this.onComplete = null;
 
-	/**
-	 * [read-only] The index MovieClips current frame (this may not have to be a whole number)
-	 *
-	 * @property currentFrame
-	 * @type Number
-	 * @default 0
-	 * @readOnly
-	 */
-	this.currentFrame = 0;
+    /**
+     * [read-only] The MovieClips current frame index (this may not have to be a whole number)
+     *
+     * @property currentFrame
+     * @type Number
+     * @default 0
+     * @readOnly
+     */
+    this.currentFrame = 0;
 
-	/**
-	 * [read-only] Indicates if the MovieClip is currently playing
-	 *
-	 * @property playing
-	 * @type Boolean
-	 * @readOnly
-	 */
-	this.playing = false;
-}
+    /**
+     * [read-only] Indicates if the MovieClip is currently playing
+     *
+     * @property playing
+     * @type Boolean
+     * @readOnly
+     */
+    this.playing = false;
+};
 
 // constructor
 PIXI.MovieClip.prototype = Object.create( PIXI.Sprite.prototype );
@@ -88,7 +88,6 @@ Object.defineProperty( PIXI.MovieClip.prototype, 'totalFrames', {
 	}
 });
 
-
 /**
  * Stops the MovieClip
  *
@@ -96,8 +95,8 @@ Object.defineProperty( PIXI.MovieClip.prototype, 'totalFrames', {
  */
 PIXI.MovieClip.prototype.stop = function()
 {
-	this.playing = false;
-}
+    this.playing = false;
+};
 
 /**
  * Plays the MovieClip
@@ -106,8 +105,8 @@ PIXI.MovieClip.prototype.stop = function()
  */
 PIXI.MovieClip.prototype.play = function()
 {
-	this.playing = true;
-}
+    this.playing = true;
+};
 
 /**
  * Stops the MovieClip and goes to a specific frame
@@ -117,11 +116,11 @@ PIXI.MovieClip.prototype.play = function()
  */
 PIXI.MovieClip.prototype.gotoAndStop = function(frameNumber)
 {
-	this.playing = false;
-	this.currentFrame = frameNumber;
-	var round = (this.currentFrame + 0.5) | 0;
-	this.setTexture(this.textures[round % this.textures.length]);
-}
+    this.playing = false;
+    this.currentFrame = frameNumber;
+    var round = (this.currentFrame + 0.5) | 0;
+    this.setTexture(this.textures[round % this.textures.length]);
+};
 
 /**
  * Goes to a specific frame and begins playing the MovieClip
@@ -131,9 +130,9 @@ PIXI.MovieClip.prototype.gotoAndStop = function(frameNumber)
  */
 PIXI.MovieClip.prototype.gotoAndPlay = function(frameNumber)
 {
-	this.currentFrame = frameNumber;
-	this.playing = true;
-}
+    this.currentFrame = frameNumber;
+    this.playing = true;
+};
 
 /*
  * Updates the object transform for rendering
@@ -143,24 +142,64 @@ PIXI.MovieClip.prototype.gotoAndPlay = function(frameNumber)
  */
 PIXI.MovieClip.prototype.updateTransform = function()
 {
-	PIXI.Sprite.prototype.updateTransform.call(this);
+    this.displayObjectContainerUpdateTransform();
 
-	if(!this.playing)return;
+    if(!this.playing)return;
 
-	this.currentFrame += this.animationSpeed;
+    this.currentFrame += this.animationSpeed;
 
-	var round = (this.currentFrame + 0.5) | 0;
+    var round = (this.currentFrame + 0.5) | 0;
 
-	if(this.loop || round < this.textures.length)
-	{
-		this.setTexture(this.textures[round % this.textures.length]);
-	}
-	else if(round >= this.textures.length)
-	{
-		this.gotoAndStop(this.textures.length - 1);
-		if(this.onComplete)
-		{
-			this.onComplete();
-		}
-	}
-}
+    this.currentFrame = this.currentFrame % this.textures.length;
+
+    if(this.loop || round < this.textures.length)
+    {
+        this.setTexture(this.textures[round % this.textures.length]);
+    }
+    else if(round >= this.textures.length)
+    {
+        this.gotoAndStop(this.textures.length - 1);
+        if(this.onComplete)
+        {
+            this.onComplete();
+        }
+    }
+};
+
+/**
+ * A short hand way of creating a movieclip from an array of frame ids
+ *
+ * @static
+ * @method fromFrames
+ * @param frames {Array} the array of frames ids the movieclip will use as its texture frames
+ */
+PIXI.MovieClip.fromFrames = function(frames)
+{
+    var textures = [];
+
+    for (var i = 0; i < frames.length; i++)
+    {
+        textures.push(new PIXI.Texture.fromFrame(frames[i]));
+    }
+
+    return new PIXI.MovieClip(textures);
+};
+
+/**
+ * A short hand way of creating a movieclip from an array of image ids
+ *
+ * @static
+ * @method fromImages
+ * @param frames {Array} the array of image ids the movieclip will use as its texture frames
+ */
+PIXI.MovieClip.fromImages = function(images)
+{
+    var textures = [];
+
+    for (var i = 0; i < images.length; i++)
+    {
+        textures.push(new PIXI.Texture.fromImage(images[i]));
+    }
+
+    return new PIXI.MovieClip(textures);
+};
